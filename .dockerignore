@@ -1,4 +1,5 @@
 .git
+.gitignore
 .venv
 __pycache__
 *.pyc
@@ -9,6 +10,8 @@ frontend/dist
 recordings.db
 output/recordings/*
 .elasticbeanstalk
-Dockerfile
-docker-compose.yml
-ios_screen_recorder_v1.zip
+.ebextensions
+*.zip
+*.log
+.vscode
+.idea
