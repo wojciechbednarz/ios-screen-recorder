@@ -30,7 +30,7 @@ RUN mkdir -p output/recordings
 ENV MOCK_MODE=true \
     DATABASE_URL="sqlite:///./recordings.db" \
     PYTHONPATH=. \
-    PORT=8000
+    PORT=8080
 # Expose the port
 EXPOSE 8080
 # Start the application using the $PORT variable
