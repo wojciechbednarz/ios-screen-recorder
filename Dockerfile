@@ -32,6 +32,6 @@ ENV MOCK_MODE=true \
     PYTHONPATH=. \
     PORT=8000
 # Expose the port
-EXPOSE 8000
+EXPOSE 8080
 # Start the application using the $PORT variable
 CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT}"]
