@@ -1,0 +1,5 @@
+Appium-Python-Client
+python-dotenv
+loguru
+typing_extensions
+behave

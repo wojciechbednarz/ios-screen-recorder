@@ -1,0 +1,14 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+node_modules
+frontend/node_modules
+frontend/dist
+recordings.db
+output/recordings/*
+.elasticbeanstalk
+Dockerfile
+docker-compose.yml
+ios_screen_recorder_v1.zip

@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MOCK_MODE=true
+      - DATABASE_URL=sqlite:///./recordings.db
+      - PLATFORM_TYPE=mock
+    volumes:
+      - ./output/recordings:/app/output/recordings

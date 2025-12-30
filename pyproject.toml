@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ios_screen_recorder"
+version = "0.1.0"
+description = "Appium iOS Screen Recorder"
+requires-python = ">=3.9"
+dependencies = [
+    "Appium-Python-Client",
+    "python-dotenv",
+    "loguru",
+    "typing_extensions",
+    "behave"
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+log_cli = true
+log_cli_level = "INFO"
