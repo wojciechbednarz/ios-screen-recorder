@@ -1,76 +1,92 @@
 # Appium iOS Screen Recorder
 
-A modern web application for recording iOS device screens using Appium, designed to work with **PostgreSQL** in production but configured for **SQLite** for easy local development.
+A specialized application for automated iOS screen recording using Appium. The project features a FastAPI backend and a React frontend, integrated into a unified Docker architecture for deployment.
 
-## Prerequisites
-- **Python 3.8+**
-- **Node.js 16+**
+## Core Technologies
+- **Backend:** Python 3.12, FastAPI, SQLAlchemy
+- **Frontend:** React, Vite, Tailwind CSS
+- **Infrastructure:** Docker, AWS (ECR, Elastic Beanstalk, CodeCommit)
+- **Database:** PostgreSQL (Production), SQLite (Development)
 
-## Quick Start (Local Development)
-For local testing, we use **SQLite** (a local file database) so you don't need to install a database server.
+## Local Development
 
-You will need **two terminal windows**.
+### 1. Manual Execution (Non-Docker)
+To run the services separately for rapid iteration:
 
-### Terminal 1: Backend
-The backend runs on port `8000`.
-
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Run server (Mock Mode + SQLite)
-# Unix/Bash:
-export MOCK_MODE=true
-export DATABASE_URL="sqlite:///./recordings.db"
-export PYTHONPATH=.
+**Backend**
+```powershell
+$env:MOCK_MODE="true"
+$env:DATABASE_URL="sqlite:///./recordings.db"
+$env:PYTHONPATH="."
 uvicorn src.api.main:app --port 8000 --reload
-
-# Windows PowerShell:
-# $env:MOCK_MODE="true"; $env:DATABASE_URL="sqlite:///./recordings.db"; $env:PYTHONPATH="."; uvicorn src.api.main:app --port 8000 --reload
 ```
 
-### Terminal 2: Frontend
-The frontend runs on port `5173`.
-
-```bash
+**Frontend**
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
----
+### 2. Docker Execution
+The system uses a multi-stage Docker build to compile the frontend and serve it via the Python backend.
 
-## Production Setup (PostgreSQL)
-For production deployment, use a real PostgreSQL database.
-
-### 1. Database Setup
-Ensure you have a PostgreSQL server running (e.g., AWS RDS or local).
-
-```bash
-# Export your PostgreSQL connection string
-export DATABASE_URL="postgresql://user:password@localhost:5432/appium_recorder"
-```
-
-### 2. Run Backend
-Do not use `MOCK_MODE` for production.
-
-```bash
-uvicorn src.api.main:app --port 8000
-```
-
----
-
-## Debugging & Maintenance
-
-### Check Server Status
-**Backend**: `netstat -ano | findstr :8000`
-**Frontend**: `netstat -ano | findstr :5173`
-
-### Kill Process (Windows)
 ```powershell
-taskkill //F //PID <PID>
+docker build -t ios-screen-recorder .
+docker run -p 8080:8080 --env MOCK_MODE=true ios-screen-recorder
 ```
 
-### Common Issues
-- **"AttributeError: 'str' object has no attribute 'hex'**: This is a database type mismatch. Fixed in latest version by auto-converting UUIDs.
-- **Port In Use**: Use the `taskkill` command above to free the port.
+## AWS Deployment Workflow
+
+### 1. Source Control (CodeCommit)
+All source code and configuration files are versioned in AWS CodeCommit.
+```powershell
+git add .
+git commit -m "commit message"
+git push
+```
+
+### 2. Image Registry (ECR)
+The application image is hosted in Amazon Elastic Container Registry.
+
+**Authenticate**
+```powershell
+aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 973508468954.dkr.ecr.eu-central-1.amazonaws.com
+```
+
+**Build and Push**
+```powershell
+docker build -t ios-screen-recorder .
+docker tag ios-screen-recorder:latest 973508468954.dkr.ecr.eu-central-1.amazonaws.com/ios-screen-recorder:latest
+docker push 973508468954.dkr.ecr.eu-central-1.amazonaws.com/ios-screen-recorder:latest
+```
+
+### 3. Environment (Elastic Beanstalk)
+The application is deployed to Elastic Beanstalk using the Docker platform. The `Dockerrun.aws.json` file instructs the environment to pull the latest image from ECR.
+
+**Deployment Command**
+```powershell
+eb deploy
+```
+
+**Status and Logs**
+```powershell
+eb status
+eb logs
+eb health
+```
+
+## Configuration
+
+### Environment Variables
+- `MOCK_MODE`: Set to `true` to simulate Appium recordings without a physical device.
+- `DATABASE_URL`: Connection string for SQLite or PostgreSQL.
+- `PORT`: Internal container port (Default: 8080).
+
+### EB Extensions
+Configuration for environment-specific settings (like database variables and deployment hooks) is located in the `.ebextensions/` directory.
+- `000_deploy.config`: Deployment scripts and permissions.
+- `001_envar.config`: Environment variable injections.
+
+## Maintenance
+To clear local database state, remove the `recordings.db` file. For production database migrations, ensure your PostgreSQL instance is reachable from the Elastic Beanstalk security group.
